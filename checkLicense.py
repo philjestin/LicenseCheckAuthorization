@@ -117,7 +117,7 @@ def send_email(body):
 	#Email information
 	#Authetnication information with Google Mail
 	username = 'pjmiddle@mtu.edu'
-	passwd = 'linuxwarrior85490.habeeb'
+	passwd = ''
 	fromaddr = 'pjmiddle@mtu.edu'
 	toaddrs = 'pjmiddle@mtu.edu'
 
@@ -131,7 +131,7 @@ def send_email(body):
 
 #Authenticating with Google Drive Spreadsheet Username for google drive account, password for account, and the document that you are trying to access.
 username = 'pjmiddle@mtu.edu'
-password = 'linuxwarrior85490.habeeb'
+password = ''
 doc_name = 'EMS Test Roster'
 
 #licenseArray:  This list will hold the licenses pulled from the Google Spreadsheet.
