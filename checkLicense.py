@@ -14,23 +14,26 @@ import re, os
 import smtplib
 
 config = {
-	 # Credentials for google drive acct with access to spreadsheet
-	'drive_username' : 'example@example.com',
-	'drive_password' : 'password',
+	# Credentials for google drive acct with access to spreadsheet
+	'drive_username' : 'bmchrist@mtu.edu',
+	'drive_password' : 'pvuhniawarbnacsb',
 	
 	# Name of spreadsheet with license numbers
-	'doc_name' : 'Example SpreadSheet',
+	'doc_name' : 'EMS Test Roster',
 	
 	# Credentials for mailserver
 	'smtp_user' : 'example@mail.com',
 	'smtp_pass' : 'password',
-	'smtp_server': 'smtp.gmail.com:587'
+	'smtp_server': 'smtp.gmail.com:587',
 	
 	# Email recipient
 	'email_to' : '',
 
 	# Email 'from' address
 	'email_from' : '',
+
+	# If person is expiring in less than this, they are expiring soon
+	'days' : 690
 }
  
 """
@@ -38,16 +41,22 @@ Connects to Google Spreadsheets and returns an iterable list of rows
 Uses global username, password and doc_name by default
 """
 def get_google_data():
+	global config
 	# Connect to Google
 	gd_client = gdata.spreadsheet.service.SpreadsheetsService()
-	gd_client.email = config.drive_username 
-	gd_client.password = config.drive_password
+	gd_client.email = config['drive_username']
+	gd_client.password = config['drive_password']
 	gd_client.ProgrammaticLogin()
 
 	q = gdata.spreadsheet.service.DocumentQuery()
-	q['title'] = config.doc_name
+	q['title'] = config['doc_name']
 	q['title-exact'] = 'true'
 	feed = gd_client.GetSpreadsheetsFeed(query=q)
+
+	# If spreadsheet not found, exit
+	if feed.entry == []:
+		print("Spreadsheet not found. Exiting")
+		exit(1)
 
 	spreadsheet_id = feed.entry[0].id.text.rsplit('/',1)[1]
 	feed = gd_client.GetWorksheetsFeed(spreadsheet_id)
@@ -62,8 +71,8 @@ Gets the current date
 """
 def get_current_date():
 	now = datetime.datetime.now()
-	currentDate = now.strftime( " %m/%d/%Y ")
-	return currentDate
+	current_date = now.strftime( " %m/%d/%Y ")
+	return current_date
 
 
 """
@@ -74,7 +83,7 @@ returns active, returns the date
 """
 def check_license(licenseNumber):
 	url = 'http://www7.dleg.state.mi.us/free/piresults.asp?license_number=' + licenseNumber
-	stringPlus = 'http://www7.dleg.state.mi.us/free/'
+	string_plus = 'http://www7.dleg.state.mi.us/free/'
 
 	#Open the page to get the url that the data is being pulled from.
 	soup = BeautifulSoup(urllib.urlopen(url).read())
@@ -87,8 +96,8 @@ def check_license(licenseNumber):
 	for tag in soup.find_all('a', href=True):
 		count += 1
 		if(count == 7):
-			goToURL = tag['href']
-			completeURL = stringPlus + goToURL
+			go_to_url = tag['href']
+			completeURL = string_plus + go_to_url
 	if(completeURL == ""):
 		return "invalid"
 
@@ -131,89 +140,91 @@ def check_license(licenseNumber):
 """
 Compare the dates
 """
-def expriring_Soon(date_Of_Expiration, current_Date):
+def expriring_Soon(date_of_expiration, current_date):
 	#Strip the dates of any unneeded characters
-	current_Date = current_Date.replace('/', '')
-	current_Date = current_Date.replace(' ', '')
-	date_Of_Expiration = date_Of_Expiration.replace('/', '')
-	date_Of_Expiration = date_Of_Expiration.replace(' ', '')
+	current_date = current_date.replace('/', '')
+	current_date = current_date.replace(' ', '')
+	date_of_expiration = date_of_expiration.replace('/', '')
+	date_of_expiration = date_of_expiration.replace(' ', '')
 
 	#Make the two dates datetime objects so they can be compared
-	current_Date = datetime.datetime.strptime(current_Date, '%m%d%Y')
-	date_Of_Expiration = datetime.datetime.strptime(date_Of_Expiration, '%m%d%Y')
+	current_date = datetime.datetime.strptime(current_date, '%m%d%Y')
+	date_of_expiration = datetime.datetime.strptime(date_of_expiration, '%m%d%Y')
 
 	#Compare the two days
-	days = (date_Of_Expiration - current_Date).days
+	days = (date_of_expiration - current_date).days
 	return days
 
 """
 Sends an email with the body passed to it
 """
 def send_email(body):
+	global config
 	#Email information
 	#Authentication information with Google Mail
-	username = config.smtp_user
-	passwd = config.smtp_pass
-	fromaddr = config.email_from
-	toaddrs = config.email_to
+	username = config['smtp_user']
+	passwd = config['smtp_pass']
+	fromaddr = config['email_from']
+	toaddrs = config['email_to']
 
 	SUBJECT = 'EMS License Experiation Test'
 	Message = 'Subject: %s\n\n%s' % (SUBJECT, body)
-	mailProcess = smtplib.SMTP(config.smtp_server)
+	mailProcess = smtplib.SMTP(config['smtp_server'])
 	mailProcess.starttls()
 	mailProcess.login(username,passwd)
 	mailProcess.sendmail(fromaddr, toaddrs, Message)
 	mailProcess.quit()	
 
 def main():
-	#licenseArray:  This list will hold the licenses pulled from the Google Spreadsheet.
-	liceenseArray = []
-	current_position = -1
-
+	global config
 	#Lists for the expiring soon licenses and the expired already licenses
-	expiredList = []
-	expiringSoonList = []
+	expired_list = []
+	expiring_soon_list = []
 
 	#Connect to google Data and get the information from the spreadsheet
-	licenesRows = get_google_data()
+	license_rows = get_google_data()
 
 	#Get the current date
-	currentDate = get_current_date()
+	current_date = get_current_date()
 
-	#Loop through licenses inside the Speadsheet, if they are Active in the spreadsheet skip them,  If they don't have a license listed skip them.
-	for person in licenesRows:
+	#Loop through licenses inside the Speadsheet
+	for person in license_rows:
 		status = person.custom['status'].text
 		license = person.custom['license'].text
-		personName = person.custom['firstname'].text + ' ' + person.custom['lastname'].text
+		person_name = person.custom['firstname'].text + ' ' + person.custom['lastname'].text
+
+		# If they are Active in the spreadsheet skip them
+		# If they don't have a license listed skip them
 		if status != 'Active':
 			continue
 		if license == None:
 			continue
 		
-		#Call check_license
-		checkLicense = check_license(license)
+		# Check their license status online
+		license_status = check_license(license)
 
-		if checkLicense == 'inactive':
-			print(checkLicense)
-			info = [personName, license]
-			expiredList.append(info)
+		if license_status == 'inactive':
+			print(license_status)
+			info = [person_name, license]
+			expired_list.append(info)
 
-		#if you get to this point it is the date that their license expires, add the person, licesnse, and date of expiration to expiringSoonList
+		#if you get to this point license_status is the date that their license expires
 		else:
-			days = expriring_Soon(checkLicense, currentDate)
-			if(days < 688):
-				print('Is expiring on' + checkLicense)
-				info = [personName, license, checkLicense]
-				expiringSoonList.append(info)
+			days = expriring_Soon(license_status, current_date)
+			if(days < config['days']):
+				# add the person, licesnse, and date of expiration to expiring_soon_list
+				print('Is expiring on' + license_status)
+				info = [person_name, license, license_status]
+				expiring_soon_list.append(info)
 
 	body = "List of expired users: \n"
-	for data in expiredList:
+	for data in expired_list:
 		name = data[0]
 		license = data[1]
 		body += name + " with license " + license + " has expired.\n"
 
 	body += "\nList of users expiring soon: \n"
-	for data in expiringSoonList:
+	for data in expiring_soon_list:
 		name = data[0]
 		license = data[1]
 		date = data[2]
@@ -221,5 +232,5 @@ def main():
 
 	send_email(body)
 
-if __name__ == __main__:
+if __name__ == '__main__':
 	main()
