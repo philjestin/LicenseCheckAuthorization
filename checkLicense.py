@@ -90,14 +90,13 @@ def check_license(licenseNumber):
 	close = False
 	count = 0
 
-	#completeURL = ""
-
 	#Gets the complete URL of the page that holds the data
 	for tag in soup.find_all('a', href=True):
 		count += 1
 		if(count == 7):
 			go_to_url = tag['href']
 			completeURL = string_plus + go_to_url
+
 	if(completeURL == ""):
 		return "invalid"
 
@@ -142,10 +141,8 @@ Compare the dates
 """
 def expriring_Soon(date_of_expiration, current_date):
 	#Strip the dates of any unneeded characters
-	current_date = current_date.replace('/', '')
-	current_date = current_date.replace(' ', '')
-	date_of_expiration = date_of_expiration.replace('/', '')
-	date_of_expiration = date_of_expiration.replace(' ', '')
+	current_date = current_date.replace('/', '').replace(' ', '')
+	date_of_expiration = date_of_expiration.replace('/', '').replace(' ', '')
 
 	#Make the two dates datetime objects so they can be compared
 	current_date = datetime.datetime.strptime(current_date, '%m%d%Y')
@@ -156,7 +153,7 @@ def expriring_Soon(date_of_expiration, current_date):
 	return days
 
 """
-Sends an email with the body passed to it
+Sends an email with the body that was passed to it
 """
 def send_email(body):
 	global config
@@ -167,16 +164,17 @@ def send_email(body):
 	fromaddr = config['email_from']
 	toaddrs = config['email_to']
 
-	SUBJECT = 'EMS License Experiation Test'
-	Message = 'Subject: %s\n\n%s' % (SUBJECT, body)
+	subject = 'EMS License Experiation Test'
+	message = 'Subject: %s\n\n%s' % (subject, body)
 	mailProcess = smtplib.SMTP(config['smtp_server'])
 	mailProcess.starttls()
 	mailProcess.login(username,passwd)
-	mailProcess.sendmail(fromaddr, toaddrs, Message)
+	mailProcess.sendmail(fromaddr, toaddrs, message)
 	mailProcess.quit()	
 
 def main():
 	global config
+	
 	#Lists for the expiring soon licenses and the expired already licenses
 	expired_list = []
 	expiring_soon_list = []
@@ -204,7 +202,7 @@ def main():
 		license_status = check_license(license)
 
 		if license_status == 'inactive':
-			print(license_status)
+			print("%s\n" % license_status)
 			info = [person_name, license]
 			expired_list.append(info)
 
@@ -213,9 +211,11 @@ def main():
 			days = expriring_Soon(license_status, current_date)
 			if(days < config['days']):
 				# add the person, licesnse, and date of expiration to expiring_soon_list
-				print('Is expiring on' + license_status)
+				print('Is expiring on %s\n' % license_status)
 				info = [person_name, license, license_status]
 				expiring_soon_list.append(info)
+			else:
+				print("Active\n")
 
 	body = "List of expired users: \n"
 	for data in expired_list:
