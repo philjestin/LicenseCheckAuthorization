@@ -22,15 +22,15 @@ config = {
 	'doc_name' : 'EMS Test Roster',
 	
 	# Credentials for mailserver
-	'smtp_user' : 'example@mail.com',
-	'smtp_pass' : 'password',
+	'smtp_user' : 'bmchrist@mtu.edu',
+	'smtp_pass' : 'pvuhniawarbnacsb',
 	'smtp_server': 'smtp.gmail.com:587',
 	
 	# Email recipient
-	'email_to' : '',
+	'email_to' : 'bmchrist@mtu.edu',
 
 	# Email 'from' address
-	'email_from' : '',
+	'email_from' : 'bmchrist@mtu.edu',
 
 	# If person is expiring in less than this, they are expiring soon
 	'days' : 690
@@ -174,7 +174,7 @@ def send_email(body):
 
 def main():
 	global config
-	
+
 	#Lists for the expiring soon licenses and the expired already licenses
 	expired_list = []
 	expiring_soon_list = []
@@ -217,13 +217,13 @@ def main():
 			else:
 				print("Active\n")
 
-	body = "List of expired users: \n"
+	body = "List of expired members: \n"
 	for data in expired_list:
 		name = data[0]
 		license = data[1]
 		body += name + " with license " + license + " has expired.\n"
 
-	body += "\nList of users expiring soon: \n"
+	body += "\nList of members expiring soon: \n"
 	for data in expiring_soon_list:
 		name = data[0]
 		license = data[1]
