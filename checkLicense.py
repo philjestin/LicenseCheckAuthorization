@@ -15,22 +15,22 @@ import smtplib
 
 config = {
 	# Credentials for google drive acct with access to spreadsheet
-	'drive_username' : 'bmchrist@mtu.edu',
-	'drive_password' : 'pvuhniawarbnacsb',
+	'drive_username' : '',
+	'drive_password' : '',
 	
 	# Name of spreadsheet with license numbers
 	'doc_name' : 'EMS Test Roster',
 	
 	# Credentials for mailserver
-	'smtp_user' : 'bmchrist@mtu.edu',
-	'smtp_pass' : 'pvuhniawarbnacsb',
+	'smtp_user' : '',
+	'smtp_pass' : '',
 	'smtp_server': 'smtp.gmail.com:587',
 	
 	# Email recipient
-	'email_to' : 'bmchrist@mtu.edu',
+	'email_to' : '',
 
 	# Email 'from' address
-	'email_from' : 'bmchrist@mtu.edu',
+	'email_from' : '',
 
 	# If person is expiring in less than this, they are expiring soon
 	'days' : 690
