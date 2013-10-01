@@ -19,7 +19,9 @@ config = {
 	'drive_password' : '',
 	
 	# Name of spreadsheet with license numbers
-	'doc_name' : 'EMS Test Roster',
+	'doc_name' : 'Current Michigan Tech EMS Roster',
+	# Name of the column holding the number
+	'doc_column' : 'License Number',
 	
 	# Credentials for mailserver
 	'smtp_user' : '',
@@ -186,9 +188,14 @@ def main():
 	current_date = get_current_date()
 
 	#Loop through licenses inside the Speadsheet
+	column_name = config['doc_column'].lower().replace(' ','')
 	for person in license_rows:
-		status = person.custom['status'].text
-		license = person.custom['license'].text
+		
+		# Temporarily removing sheet 'status' functionality - may not be needed
+		#status = person.custom['status'].text
+		status='Active'
+
+		license = person.custom[column_name].text
 		person_name = person.custom['firstname'].text + ' ' + person.custom['lastname'].text
 
 		# If they are Active in the spreadsheet skip them
