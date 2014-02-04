@@ -15,8 +15,8 @@ import smtplib
 
 config = {
 	# Credentials for google drive acct with access to spreadsheet
-	'drive_username' : '',
-	'drive_password' : '',
+	'drive_username' : 'pjmiddle@mtu.edu',
+	'drive_password' : 'Python85490.habeeb',
 	
 	# Name of spreadsheet with license numbers
 	'doc_name' : 'Current Michigan Tech EMS Roster',
@@ -24,15 +24,15 @@ config = {
 	'doc_column' : 'License Number',
 	
 	# Credentials for mailserver
-	'smtp_user' : '',
-	'smtp_pass' : '',
+	'smtp_user' : 'pjmiddle@mtu.edu',
+	'smtp_pass' : 'Python85490.habeeb',
 	'smtp_server': 'smtp.gmail.com:587',
 	
 	# Email recipient
-	'email_to' : '',
+	'email_to' : 'pjmiddle@mtu.edu',
 
 	# Email 'from' address
-	'email_from' : '',
+	'email_from' : 'pjmiddle@mtu.edu',
 
 	# If person is expiring in less than this, they are expiring soon
 	'days' : 690
@@ -84,8 +84,8 @@ returns inactive if Status is not Active
 returns active, returns the date
 """
 def check_license(licenseNumber):
-	url = 'http://www7.dleg.state.mi.us/free/piresults.asp?license_number=' + licenseNumber
-	string_plus = 'http://www7.dleg.state.mi.us/free/'
+	url = 'http://w3.lara.state.mi.us/free/piresults.asp?license_number=' + licenseNumber
+	string_plus = 'http://w3.lara.state.mi.us/free/'
 
 	#Open the page to get the url that the data is being pulled from.
 	soup = BeautifulSoup(urllib.urlopen(url).read())
@@ -93,11 +93,8 @@ def check_license(licenseNumber):
 	count = 0
 
 	#Gets the complete URL of the page that holds the data
-	for tag in soup.find_all('a', href=True):
-		count += 1
-		if(count == 7):
-			go_to_url = tag['href']
-			completeURL = string_plus + go_to_url
+	link = soup.select('table table a')[0].attrs['href']
+	completeURL = string_plus + link
 
 	if(completeURL == ""):
 		return "invalid"
