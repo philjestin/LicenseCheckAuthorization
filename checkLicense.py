@@ -15,8 +15,8 @@ import smtplib
 
 config = {
 	# Credentials for google drive acct with access to spreadsheet
-	'drive_username' : 'pjmiddle@mtu.edu',
-	'drive_password' : 'Python85490.habeeb',
+	'drive_username' : '',
+	'drive_password' : '',
 	
 	# Name of spreadsheet with license numbers
 	'doc_name' : 'Current Michigan Tech EMS Roster',
@@ -24,15 +24,15 @@ config = {
 	'doc_column' : 'License Number',
 	
 	# Credentials for mailserver
-	'smtp_user' : 'pjmiddle@mtu.edu',
-	'smtp_pass' : 'Python85490.habeeb',
+	'smtp_user' : '',
+	'smtp_pass' : '',
 	'smtp_server': 'smtp.gmail.com:587',
 	
 	# Email recipient
-	'email_to' : 'pjmiddle@mtu.edu',
+	'email_to' : '',
 
 	# Email 'from' address
-	'email_from' : 'pjmiddle@mtu.edu',
+	'email_from' : '',
 
 	# If person is expiring in less than this, they are expiring soon
 	'days' : 690
