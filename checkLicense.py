@@ -93,7 +93,8 @@ def check_license(licenseNumber):
 	count = 0
 
 	#Gets the complete URL of the page that holds the data
-	link = soup.select('table table a')[0].attrs['href']
+        link = soup.findAll('table')[3].find('a').attrs['href']
+	#link = soup.select('table table a')[0].attrs['href'] # For some reason the EMS server doesn't handle select() properly
 	completeURL = string_plus + link
 
 	if(completeURL == ""):
